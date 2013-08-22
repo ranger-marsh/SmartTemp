@@ -33,4 +33,4 @@ Sources:
 
 This code is for an ATtiny85. The ATtiny85 reads sensor data from am TMP36 then filters and sends the data back to an Arduino UNO using I2C. These slaves will placed througout my house using unused ethernet ports to connect to the I2C  lines. 
 
-I will eeventually display the temps on 8 segment displays in a central location. I will also be controlling a blower fan to boost my air flow from my HVAC system to upstairs.  
+I will eeventually display the temps on 7 segment displays in a central location. I will also be controlling a blower fan to boost my air flow from my HVAC system to upstairs.  
