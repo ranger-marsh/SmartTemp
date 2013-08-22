@@ -1,0 +1,159 @@
+#include "TinyWireS.h"  
+
+#define I2C_SLAVE_ADDR  0x29
+#define NUM_READS 100
+#define temperaturePin  3
+
+float roomTemperatureActual;
+float fastFilter[4]; 
+float roomTempFast[4];  
+float slowFilter[4];
+float roomTempSlow[4];
+
+unsigned long sampleTimerFast;
+unsigned long sampleTimerSlow;
+
+boolean firstbyte = true;
+
+void setup()
+{
+  analogReference(INTERNAL);
+  pinMode(temperaturePin,INPUT);
+  initFilters(); 
+  TinyWireS.begin(I2C_SLAVE_ADDR);      
+  TinyWireS.onRequest(requestEvent);
+}
+
+void loop()
+{
+  if(millis()- sampleTimerFast > 200){ //update fast filters every 200 ms
+    sampleTimerFast=millis();
+    updateTemperatures();
+  }
+  if(millis()-sampleTimerSlow > 10000){ //update slow filter every 10 seconds
+    sampleTimerSlow=millis();
+    updateSlowFilteredTemperatures();
+  }
+}
+void initFilters(void){
+  roomTemperatureActual = readTemperature(temperaturePin);
+  for(int i=0;i<4;i++){
+    roomTempFast[i]=roomTemperatureActual;
+    fastFilter[i]=roomTemperatureActual;
+
+  }
+  for(int i=0;i<100;i++){
+    updateTemperatures();
+  }
+  for(int i=0;i<4;i++){
+    roomTempSlow[i]=fastFilter[3];
+    slowFilter[i]=fastFilter[3];
+  }
+  for(int i=0;i<100;i++){
+    updateSlowFilteredTemperatures();
+  }
+ 
+}//See uberFridge in Notes
+
+float readTemperature(int sensorpin){
+  // read multiple values and sort them to take the mode
+  int sortedValues[NUM_READS];
+  for(int i=0;i<NUM_READS;i++){
+    int value = analogRead(sensorpin);
+    int j;
+    if(value<sortedValues[0] || i==0){
+      j=0; //insert at first position
+    }
+    else{
+      for(j=1;j<i;j++){
+        if(sortedValues[j-1]<=value && sortedValues[j]>=value){
+          // j is insert position
+          break;
+        }
+      }
+    }
+    for(int k=i;k>j;k--){
+      // move all values higher than current reading up one position
+      sortedValues[k]=sortedValues[k-1];
+    }
+    sortedValues[j]=value; //insert current reading
+  }
+  //return scaled mode of 10 values
+  float returnval = 0;
+  for(int i=NUM_READS/2-5;i<(NUM_READS/2+5);i++){
+    returnval +=sortedValues[i];
+  }
+  returnval = returnval/10;
+  return returnval;
+}//See uberFridge in Notes
+
+void updateTemperatures(void){ //called every 200 milliseconds  
+  roomTempFast[0] = roomTempFast[1]; 
+  roomTempFast[1] = roomTempFast[2]; 
+  roomTempFast[2] = roomTempFast[3]; 
+  roomTempFast[3] = readTemperature(temperaturePin); 
+
+  // Butterworth filter with cutoff frequency 0.033*sample frequency (FS=5Hz)
+  fastFilter[0] = fastFilter[1]; 
+  fastFilter[1] = fastFilter[2]; 
+  fastFilter[2] = fastFilter[3];
+  fastFilter[3] =   (roomTempFast[0] + roomTempFast[3] + 3 * (roomTempFast[1] + roomTempFast[2]))/1.092799972e+03
+    + ( 0.6600489526    * fastFilter[0]) + (  -2.2533982563     * fastFilter[1]) + ( 2.5860286592 * fastFilter[2] ); 
+
+  roomTemperatureActual = fastFilter[3];
+}//See uberFridge in Notes
+
+void updateSlowFilteredTemperatures(void){ //called every 10 seconds
+  // Input for filter
+  roomTempSlow[0] = roomTempSlow[1]; 
+  roomTempSlow[1] = roomTempSlow[2]; 
+  roomTempSlow[2] = roomTempSlow[3]; 
+  roomTempSlow[3] = fastFilter[3]; 
+
+  // Butterworth filter with cutoff frequency 0.01*sample frequency (FS=0.1Hz)
+  slowFilter[0] = slowFilter[1]; 
+  slowFilter[1] = slowFilter[2]; 
+  slowFilter[2] = slowFilter[3];
+  slowFilter[3] =   (roomTempSlow[0] + roomTempSlow[3] + 3 * (roomTempSlow[1] + roomTempSlow[2]))/3.430944333e+04
+    + ( 0.8818931306    * slowFilter[0]) + (  -2.7564831952     * slowFilter[1]) + ( 2.8743568927 * slowFilter[2] ); 
+
+}//See uberFridge in Notes
+
+float tempConverter()                     
+{ 
+float milliVolts = roomTemperatureActual *  1.00416101; //Gained through calibration see notes
+float temperatureC = (milliVolts - 500) / 10;  //converting from 10 mv per degree wit 500 mV offset
+float temperatureF = temperatureC * 1.8 + 32.0; // now convert to Fahrenheight
+return temperatureF;
+//return temperatureC; 
+} 
+
+void requestEvent()
+{
+  float z = tempConverter();
+  int x = (tempConverter()* 100);
+  int temp = x;
+  byte templow;
+  byte temphi;
+
+  if(firstbyte == true)
+  {     
+    templow=lowByte(temp);
+    firstbyte = false;         
+    TinyWireS.send(templow);
+    tws_delay(50);
+  } 
+  else 
+  {
+    temphi=highByte(temp);
+    TinyWireS.send(temphi);
+    firstbyte = true;
+    tws_delay(50);
+  }
+}
+
+/*
+This runs when the Arduino Uno request the temputure. The arduino is running Wire.h as a master.
+I break temperature into high byte low byte to make it easier to send. I multiply by 100 to avoid sending a float.
+I am guessing there is a better way to do this if you have code let me know. 
+*/
