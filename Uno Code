@@ -1,0 +1,34 @@
+#include <Wire.h>
+
+int address = 38;
+void setup()
+{
+  Wire.begin();
+  Serial.begin(9600);
+}
+
+void loop(){
+
+  byte hb;
+  byte lb;
+
+  Wire.requestFrom(address ,2); 
+  if (Wire.available()) 
+  {
+    lb=Wire.read();
+    hb=Wire.read();
+  }
+  int temp =word(hb,lb);
+  Serial.print(address);
+  Serial.print(": "); 
+  Serial.println (temp * .01); 
+  delay(2575);
+  address++;   
+
+  if (address >= 42)
+  {
+    address = 38;
+    Serial.println();
+  }
+
+}
