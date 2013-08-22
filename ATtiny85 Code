@@ -35,6 +35,7 @@ void loop()
     updateSlowFilteredTemperatures();
   }
 }
+
 void initFilters(void){
   roomTemperatureActual = readTemperature(temperaturePin);
   for(int i=0;i<4;i++){
@@ -116,7 +117,6 @@ void updateSlowFilteredTemperatures(void){ //called every 10 seconds
   slowFilter[2] = slowFilter[3];
   slowFilter[3] =   (roomTempSlow[0] + roomTempSlow[3] + 3 * (roomTempSlow[1] + roomTempSlow[2]))/3.430944333e+04
     + ( 0.8818931306    * slowFilter[0]) + (  -2.7564831952     * slowFilter[1]) + ( 2.8743568927 * slowFilter[2] ); 
-
 }//See uberFridge in Notes
 
 float tempConverter()                     
