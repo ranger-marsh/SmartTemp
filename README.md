@@ -23,3 +23,7 @@ Sources:
    
 4) TinyWire I2C for the ATtiny85/84:
    http://playground.arduino.cc/Code/USIi2c
+
+
+This code is for an ATtiny85. The ATtiny85 reads sensor data from am TMP36 then filters and sends the data back to
+an Arduino UNO using I2C. 
