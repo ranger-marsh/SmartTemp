@@ -1,0 +1,24 @@
+#include "TinyWireS.h"  
+#define I2C_SLAVE_ADDR  0x25
+
+int relay1 = 3;
+int relay2 = 4;
+
+void setup()
+
+{
+  TinyWireS.begin(I2C_SLAVE_ADDR);      
+  pinMode(relay1, OUTPUT); 
+  pinMode(relay2, OUTPUT);
+  digitalWrite(relay1, HIGH);
+  digitalWrite(relay2, HIGH);
+}
+
+void loop()
+{
+  int relayFlip = TinyWireS.receive();
+  if (relayFlip == 0)
+    digitalWrite(relay1, LOW);              
+  if (relayFlip == 1)
+    digitalWrite(relay1, HIGH);     
+}
