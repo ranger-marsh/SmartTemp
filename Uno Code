@@ -6,8 +6,6 @@
 
 Adafruit_RGBLCDShield lcd = Adafruit_RGBLCDShield(); //Adafruit code for lcd
 
-
-
 float outSidetemp,tvRoomtemp,bedRoomtemp,basementtemp,temperatureDifference; // temperatures to display and use for relay trips recieved from remote sensors
 
 unsigned long getTemperaturesTimer = millis();
@@ -21,8 +19,6 @@ int fanMode = 1; //Auto = 1, Off = 3 or On = 2, used by fanTrip
 int Menu = 0; //switch case for display_control
 int mainMenu = 0;//switch case for mainMenu
 int settingsMenu = 1;//switch case for settings_Menu
-
-
 
 boolean select = false;  //buttons for menu control used by displayControl,mainMenu,settings_Menu
 boolean up = false;
@@ -530,12 +526,3 @@ void my_delay(unsigned long duration) //avoiding the delay command
 {
   for (unsigned long start = millis(); millis() < (start + duration); );
 }
-
-
-
-
-
-
-
-
-
