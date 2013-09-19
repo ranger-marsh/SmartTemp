@@ -2,7 +2,7 @@ This project was designed to control a HVAC blower fan to blow cool air from my 
 
 This is a video of the project in action: http://youtu.be/glCS1Rm0Yho
 
-Works Cited
+Sources
 
 1. Mchr3k. Mchr3k - Arduino. [Online] July 2013.                                                                             http://mchr3k-arduino.blogspot.com/2012/02/wireless-sensor-node-part-9.html.
 
