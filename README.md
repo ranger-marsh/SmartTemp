@@ -1,6 +1,6 @@
 This project was designed to control a HVAC blower fan to blow cool air from my basement up to my bedroom during the warm summer month. I use four TMP36 temperature sensors each controlled by an Attiny85. The Attiny85 filters the analog data and then communicates back to an Arduino Uno via i2c. I also use an Attiny85 to control a relay that controls the blower fan this allows it to communicate over i2c. I use an Adafruit 16x2 LCD shield with buttons to display the temperatures and adjust menu settings. The LCD and buttons are controlled via i2c. This means the whole system only uses two wires for communication.  The Arduino Uno acts as the i2c master parsing the incoming data and changing the necessary variables. 
 
-This is a video of the project in action: Coming soon
+This is a video of the project in action: http://youtu.be/glCS1Rm0Yho
 
 Works Cited
 
