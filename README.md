@@ -4,9 +4,9 @@ This is a video of the project in action: http://youtu.be/glCS1Rm0Yho
 
 Sources
 
-1. Mchr3k. Mchr3k - Arduino. [Online] July 2013.                                                                             http://mchr3k-arduino.blogspot.com/2012/02/wireless-sensor-node-part-9.html.
+1. Mchr3k. Mchr3k - Arduino. [Online] July 2013. http://mchr3k-arduino.blogspot.com/2012/02/wireless-sensor-node-part-9.html                                                                
 
-2. Media, M.I.T. High-Low Tech. [Online] http://hlt.media.mit.edu/?p=1695.
+2. Media, M.I.T. High-Low Tech. [Online] July 2013. http://hlt.media.mit.edu/?p=1695.
 
 3. BroHogan. Arduino Playground. I2C (master and slave) on the ATtiny85. [Online] July 2013.                                 http://playground.arduino.cc/Code/USIi2c.
 
