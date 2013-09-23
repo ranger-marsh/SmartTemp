@@ -216,7 +216,12 @@ void settings_Menu() // menu to change settings
     settingsMenu++;
     right=false;
   }
-
+  
+  if ((fanON-fanOFF)<= 0) //if this statement is true the relay would turn on/off very fast this prevents that
+  {
+    fanON= 5;
+    fanOFF= 3;
+  }
 
   switch (settingsMenu)
   {
