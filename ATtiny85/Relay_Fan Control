@@ -1,6 +1,6 @@
 /*  
 This Attiny85 controls the relay the relay controls the blower fan. 
-The relay has two channels I am currently using only one although I coded to be ready to use both.
+The relay is two channels I am currently using only one although I coded to be ready to use both.
 The relay needs to be pulled LOW to turn ON and pulled HIGH to turn OFF. 
 http://www.sainsmart.com/arduino-compatibles-1/relay/arduino-pro-mini.html
 http://www.grainger.com/Grainger/DAYTON-PSC-Blower-1TDR3
