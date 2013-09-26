@@ -117,7 +117,6 @@ void main_Menu() // displaying information based that can changes with button pr
     lcd.print("F");
     lcd.print("     ");
 
-
     if (down == true)
     {
       mainMenu = 0;
@@ -208,8 +207,8 @@ void settings_Menu() // menu to change system settings
   {
     settingsMenu--;
     left=false;
-
   }
+  
   if (right == true)
   {
     settingsMenu++;
@@ -353,9 +352,7 @@ void fanTrip()
     my_delay(5);
     fanStatus = 0; 
     fanTripTimer = millis()+299500; // if fanMode goes back to auto check quickly 
-    //Serial.println ("ON");
     break;
-
 
   case 3: // if fanMode is off turn Attiny85/relay/fan off and leave off 
 
@@ -423,7 +420,7 @@ void getTemperatures() // request the temperatures from the slave Attiny85/TMP36
     getTemperaturesTimer = millis();
   }
 }
-// bellow is the request to the slave Attiny85/TP36 sensors 
+// bellow is the request sent to the slave Attiny85/TP36 sensors 
 void bedRoom ()
 { 
   byte hb; 
