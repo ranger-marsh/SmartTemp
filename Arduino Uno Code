@@ -16,7 +16,7 @@ int fanStatus = 1;    // Fan is ON equals 0, Fan is OFF equals 1
 int fanON = 5;        // degrees F between bedroom and basement that will trip the relay on this is selectable via select_menu
 int fanOFF = 3;       // degrees F between bedroom and basement that will trip the relay off is is already on this is selectable via settings_Menu()
 int fanMode = 1;      // Auto = 1, Off = 3 or On = 2, used by fanTrip()
-int Menu = 0;         // switch case for display_control
+int Menu = 0;         // switch case for display_control()
 int mainMenu = 0;     // switch case for mainMenu()
 int settingsMenu = 1; // switch case for settings_Menu()
 
