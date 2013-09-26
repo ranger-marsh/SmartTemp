@@ -127,7 +127,9 @@ float temperatureF = temperatureC * 1.8 + 32.0; // now convert to Fahrenheight
 return temperatureF;
 //return temperatureC; 
 } 
-
+/*
+Below runs when the Arduino Uno request the temperature. I break reading into high byte/low byte to and multiply by 100 to circumvent sending a float. 
+*/
 void requestEvent()
 {
   float z = tempConverter();
@@ -151,9 +153,3 @@ void requestEvent()
     tws_delay(50);
   }
 }
-
-/*
-This runs when the Arduino Uno request the temputure. The arduino is running Wire.h as a master.
-I break temperature into high byte low byte to make it easier to send. I multiply by 100 to avoid sending a float.
-I am guessing there is a better way to do this if you have code let me know. 
-*/
