@@ -6,15 +6,15 @@
 
 Adafruit_RGBLCDShield lcd = Adafruit_RGBLCDShield(); // Adafruit code for lcd
 
-float outSidetemp,tvRoomtemp,bedRoomtemp,basementtemp,temperatureDifference; //temperatures to display and use for relay                                                                                trips received from slave Attiny85/TMP36                                                                                sensors
+float outSidetemp,tvRoomtemp,bedRoomtemp,basementtemp,temperatureDifference; //temperatures to display and use for relay trips received from slave Attiny85/TMP36 sensors
 
 unsigned long getTemperaturesTimer = millis(); // timer for requesting temperatures from the slave Attiny85/TMP36 slaves
 unsigned long buttonTimer = millis();          // timer to tell board how often to poll for button presses 
 unsigned long fanTripTimer = millis();         // timer for how often to check if the slave Attiny85/relay/fan needs to turn on or off
 
 int fanStatus = 1;    // Fan is ON equals 0, Fan is OFF equals 1 
-int fanON = 5;        // degrees F between bedroom and basement that will trip the relay on this is selectable via                               select_menu
-int fanOFF = 3;       // degrees F between bedroom and basement that will trip the relay off is is already on this is                            selectable via settings_Menu()
+int fanON = 5;        // degrees F between bedroom and basement that will trip the relay on this is selectable via select_menu
+int fanOFF = 3;       // degrees F between bedroom and basement that will trip the relay off is is already on this is selectable via settings_Menu()
 int fanMode = 1;      // Auto = 1, Off = 3 or On = 2, used by fanTrip()
 int Menu = 0;         // switch case for display_control
 int mainMenu = 0;     // switch case for mainMenu()
@@ -47,4 +47,481 @@ void loop()
   displayControl();  // display information, temperature by default, buttons change what is displayed and access to menus 
   getTemperatures(); // get the temperatures from the slave Attiny85/TMP36 sensors  
   fanTrip();         // what should the slave Attny85/relay/fan do? Turn on, off or stay the course
+}
+
+void displayControl() // listening for select button to be push to change switch case into settings_Menu() or back to main_Menu()
+{
+  if (select == true) 
+  { 
+    Menu++; 
+    select = false;
+  }
+  if (Menu >= 2)
+  {
+    Menu=0;
+  }
+  
+  switch (Menu)
+  { 
+  case 0:
+    main_Menu();    // main menu displaying current temperatures, system statuses, and temperature differences 
+    break;
+
+  case 1:
+   settings_Menu(); // menu to change system settings including fanON, FanOFF and fanMode 
+    break;
+  }
+}
+
+void main_Menu() // displaying information based that can changes with button presses 
+{
+  if (left != right) // this allows left or right buttons to be pressed in any order from any position 
+  {
+    mainMenu = 1;  
+  }
+  else
+  {
+    mainMenu = 0;  
+  }
+
+  if (down == true)
+  {
+    mainMenu = 2;  
+  }
+
+  if (up == true)
+  {
+    mainMenu = 3; 
+  }
+
+  switch (mainMenu) 
+  {
+  case 0: // display first set of temperatures
+
+    displayTVroom(); 
+    displayOutside();
+    break;
+
+  case 1: // display second set of temperatures
+
+    displayBedroom(); 
+    displayBasement(); 
+    break; 
+
+  case 2: // display temperatureDifference  
+    lcd.setCursor(0,0); 
+    lcd.print("Temp Difference");
+    lcd.setCursor(5,1);
+    lcd.print(temperatureDifference);
+    lcd.print((char)0);
+    lcd.print("F");
+    lcd.print("     ");
+
+
+    if (down == true)
+    {
+      mainMenu = 0;
+    }
+    break;
+
+  case 3: // display system statuses including fanMode and fanStatus 
+    lcd.setCursor(0,0); 
+    lcd.print("Fan Mode: ");
+    if (fanMode == 1)
+    {
+      lcd.print("  Auto");
+    }
+    if (fanMode == 2)
+    {
+      lcd.print("    On");
+    }
+
+    if (fanMode == 3)
+    {
+      lcd.print("   Off");
+    }
+
+    lcd.setCursor(0,1);
+    lcd.print("Fan Status: ");
+    if (fanStatus == 0)
+    { 
+      lcd.print("  On");
+    }
+    if (fanStatus == 1)
+    { 
+      lcd.print(" Off");
+    }
+    break;
+  }
+}
+
+// below displays the individual slave Attiny85/TMP36 readings   
+void displayTVroom()
+{
+  lcd.setCursor(0, 0);
+  lcd.print("TV Room ");
+  lcd.print (tvRoomtemp);
+  lcd.print((char)0);
+  lcd.print("F");
+}
+
+void displayOutside()
+{
+  lcd.setCursor(0, 1);
+  lcd.print("Outside ");
+  lcd.print (outSidetemp); 
+  lcd.print((char)0);
+  lcd.print("F");
+
+}
+
+void displayBedroom()
+{
+  lcd.setCursor(0, 0);
+  lcd.print("Bed Room "); 
+  lcd.print (bedRoomtemp);
+  lcd.print((char)0);
+  lcd.print("F");
+}
+
+void displayBasement()
+{
+  lcd.setCursor(0, 1);
+  lcd.print("Basement ");
+  lcd.print (basementtemp);
+  lcd.print((char)0);
+  lcd.print("F");
+}
+
+void settings_Menu() // menu to change system settings 
+{
+  if (settingsMenu == 0) 
+  {
+    settingsMenu = 3;
+  }
+  if (settingsMenu == 4)
+  {
+    settingsMenu = 1;
+  }
+
+  if (left == true)
+  {
+    settingsMenu--;
+    left=false;
+
+  }
+  if (right == true)
+  {
+    settingsMenu++;
+    right=false;
+  }
+
+  if ((fanON-fanOFF)<= 0) // if fanON < fanOFF the slave Attiny85/relay/fan would turn on and off rapidly this prevents user from selecting this scenario 
+  {
+    fanON= 5;
+    fanOFF= 3;
+  }
+
+  switch (settingsMenu)
+  {
+  case 1: // menu to change that changes system setting fanMode
+    lcd.setCursor(4,0);
+    lcd.print("Fan Mode");
+
+    if (down == true)
+    {
+      fanMode--;
+      down=false;
+      if (fanMode ==0 )
+      {
+        fanMode = 3;
+      }
+    }
+    if (up == true)
+    {
+      fanMode++;
+      up=false;
+      if (fanMode==4)
+      {
+        fanMode = 1;
+      }
+    }
+    if (fanMode == 1)
+    { 
+      lcd.setCursor(6,1);
+      lcd.print("Auto");
+    }
+    if (fanMode == 2)
+    { 
+      lcd.setCursor(7,1);
+      lcd.print("On");
+    }
+    if (fanMode == 3)
+    { 
+      lcd.setCursor(6,1);
+      lcd.print("Off");
+    }
+    break; 
+
+  case 2: // menu to change system setting fanON
+    lcd.setCursor(2,0);
+    lcd.print("FAN TRIP ON");
+    lcd.setCursor(7, 1);
+    lcd.print(fanON);
+    lcd.print((char)0);
+    lcd.print("F");
+    if (down == true)
+    {
+
+      fanON--;
+      down=false;
+      if (fanON ==0 )
+      {
+        fanON = 9;
+      }
+    }
+    if (up == true)
+    {
+      fanON++;
+      Serial.print(fanON);
+      up=false;
+      if (fanON==10)
+      {
+        fanON = 1;
+      }
+    }
+    break;
+
+  case 3: // menu to change system setting fanOFF
+    lcd.setCursor(2, 0);
+    lcd.print("FAN TRIP OFF");
+    lcd.setCursor(7, 1);
+    lcd.print(fanOFF);
+    lcd.print((char)0);
+    lcd.print("F");
+
+    if (down == true)
+    {
+      fanOFF--;
+      down=false;
+      if (fanOFF ==0 )
+      {
+        fanOFF = 9;
+      }
+    }
+    if (up == true)
+    { 
+      fanOFF++;
+      up=false;
+      if (fanOFF==10)
+      {
+        fanOFF = 1;
+      }
+    }
+    break;
+  }
+}
+
+void fanTrip()
+{ 
+  temperatureDifference = (bedRoomtemp-basementtemp); // temperature that system uses to determine what the slave Attin85/relay/fan should do while fanMode is auto
+
+  switch (fanMode)
+
+  {
+  case 1: // if fanMode is auto check to see what the slave Attiny85/relay/fan should do 
+    
+    if(millis()- fanTripTimer > 300000) // check every 5 minutes, the delay prevents the Attiny85/relay/fan from rapid trips if something goes wrong
+    {
+      if (fanStatus == 1)                  
+      {   
+        fanTrip1();
+        fanTripTimer = millis();
+      }
+      if(fanStatus == 0)
+      { 
+        fanTripTimer = millis();
+        fanTrip2();
+      }
+    }
+    break;
+  case 2: // if fanMode is on turn Attiny85/relay/fan on and leave on
+
+    Wire.beginTransmission(37);
+    Wire.write(0); 
+    Wire.endTransmission();
+    my_delay(5);
+    fanStatus = 0; 
+    fanTripTimer = millis()+299500; // if fanMode goes back to auto check quickly 
+    //Serial.println ("ON");
+    break;
+
+
+  case 3: // if fanMode is off turn Attiny85/relay/fan off and leave off 
+
+    Wire.beginTransmission(37);
+    Wire.write(1); 
+    Wire.endTransmission();
+    fanStatus = 1; 
+    fanTripTimer = millis()+299500; // if fanMode goes back to auto check quickly 
+    my_delay(5);
+    break; 
+  }
+}
+
+void fanTrip1() // if fanStatus is off should it switch to on  
+{ 
+  if (temperatureDifference > fanON)
+  {
+    Wire.beginTransmission(37);
+    Wire.write(0); 
+    Wire.endTransmission();
+    my_delay(5);
+    fanStatus = 0; //fanStatus is on
+  }
+  else
+  {
+    Wire.beginTransmission(37);
+    Wire.write(1); 
+    Wire.endTransmission();
+    my_delay(5);  
+    fanStatus = 1; //fanStatusis off  
+  }
+}
+
+void fanTrip2() //if fanStatus is on should it switch to off 
+{ 
+
+  if (temperatureDifference < fanOFF)
+  {
+    Wire.beginTransmission(37);
+    Wire.write(1); 
+    Wire.endTransmission();
+    my_delay(5);
+    fanStatus = 1; //fanStatus is off
+  }
+  else
+  {
+    Wire.beginTransmission(37);
+    Wire.write(0); 
+    Wire.endTransmission();
+    my_delay(5);  
+    fanStatus = 0; //fanStatus is on
+  }
+}
+void getTemperatures() // request the temperatures from the slave Attiny85/TMP36 sensors  
+{
+  if(millis()- getTemperaturesTimer > 2000) // wait 2 seconds between request
+  {
+    bedRoom();
+    my_delay(50); // short delay to allow the magic to happen 
+    outSide();
+    my_delay(50);
+    basement();
+    my_delay(50);
+    tvRoom();
+    getTemperaturesTimer = millis();
+  }
+}
+// bellow is the request to the slave Attiny85/TP36 sensors 
+void bedRoom ()
+{ 
+  byte hb; 
+  byte lb;
+  Wire.requestFrom(40 ,2); 
+  if (Wire.available()) 
+  {
+    lb=Wire.read();
+    hb=Wire.read();
+  }
+  int temp =word(hb,lb);
+  bedRoomtemp = (temp *.01); // the Attiny85/TMP36 multiplied the reading by 100 to circumvent sending a float now I dived by 100 to parse 
+}
+
+void outSide ()
+{
+  byte hb;
+  byte lb;
+  Wire.requestFrom(41 ,2); 
+  if (Wire.available()) 
+  {
+    lb=Wire.read();
+    hb=Wire.read();
+  }
+  int temp =word(hb,lb);
+  outSidetemp = (temp *.01);
+}
+
+void basement()
+{ 
+  byte hb;
+  byte lb;
+  Wire.requestFrom(38 ,2); 
+  if (Wire.available()) 
+  {
+    lb=Wire.read();
+    hb=Wire.read();
+  }
+  int temp =word(hb,lb);
+  basementtemp = (temp *.01);
+}
+
+void tvRoom()
+{
+  byte hb;
+  byte lb;
+  Wire.requestFrom(39 ,2); 
+  if (Wire.available()) 
+  {
+    lb=Wire.read();
+    hb=Wire.read();
+  }
+  int temp =word(hb,lb);
+  tvRoomtemp = (temp *.01);
+}
+
+void buttonCheck() // checking for button presses I modified the Adafruit code for my application 
+{
+  uint8_t buttons = lcd.readButtons();
+  
+  if(millis()- buttonTimer > 300)
+  {
+    if (buttons) {
+      if (buttons & BUTTON_SELECT) 
+      { 
+        select = !  select;
+        lcd.setCursor(15, 1); 
+        lcd.clear();
+      }
+      if (buttons & BUTTON_UP) 
+      {
+        up = ! up;
+        lcd.setCursor(15, 1);
+        lcd.clear(); 
+      }
+      if (buttons & BUTTON_DOWN) 
+      {
+        down = ! down ;
+        lcd.setCursor(15, 1);
+        lcd.clear(); 
+      }
+      if (buttons & BUTTON_LEFT) 
+      {
+        left = ! left;
+        lcd.setCursor(15, 1); 
+        lcd.clear();
+      }
+      if (buttons & BUTTON_RIGHT) 
+      {
+        right = ! right;
+        lcd.setCursor(15, 1); 
+        lcd.clear();
+      }buttonTimer=millis();
+    }
+  } 
+}
+
+void my_delay(unsigned long duration) // avoiding the delay command
+{
+  for (unsigned long start = millis(); millis() < (start + duration); );
 }
