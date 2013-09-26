@@ -282,7 +282,6 @@ void settings_Menu() // menu to change system settings
     if (up == true)
     {
       fanON++;
-      Serial.print(fanON);
       up=false;
       if (fanON==10)
       {
