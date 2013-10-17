@@ -471,7 +471,8 @@ void buttonCheck() // checking for button presses I modified the Adafruit code f
         right = ! right;
         lcd.setCursor(15, 1); 
         lcd.clear();
-      }buttonTimer=millis();
+      }
+    buttonTimer=millis();
     }
   } 
 }
