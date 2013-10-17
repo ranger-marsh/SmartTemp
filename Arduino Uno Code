@@ -405,75 +405,34 @@ void fanTrip2() //if fanStatus is on should it switch to off
     fanStatus = 0; //fanStatus is on
   }
 }
+
 void getTemperatures() // request the temperatures from the slave Attiny85/TMP36 sensors  
 {
   if(millis()- getTemperaturesTimer > 2000) // wait 2 seconds between request
   {
-    bedRoom();
+    int bedRoom = getTemp(40,2);
     my_delay(50); // short delay to allow the magic to happen 
-    outSide();
+    int outSide = getTemp(41,2);
     my_delay(50);
-    basement();
+    int basement = getTemp(38,2);
     my_delay(50);
-    tvRoom();
+    int tvRoom = getTemp(39,2);
     getTemperaturesTimer = millis();
   }
 }
 // bellow is the request sent to the slave Attiny85/TP36 sensors 
-void bedRoom ()
+int getTemp(int address, int bytes)
 { 
   byte hb; 
   byte lb;
-  Wire.requestFrom(40 ,2); 
+  Wire.requestFrom(address ,bytes); 
   if (Wire.available()) 
   {
     lb=Wire.read();
     hb=Wire.read();
   }
   int temp =word(hb,lb);
-  bedRoomtemp = (temp *.01); // the Attiny85/TMP36 multiplied the reading by 100 to circumvent sending a float now I dived by 100 to parse 
-}
-
-void outSide ()
-{
-  byte hb;
-  byte lb;
-  Wire.requestFrom(41 ,2); 
-  if (Wire.available()) 
-  {
-    lb=Wire.read();
-    hb=Wire.read();
-  }
-  int temp =word(hb,lb);
-  outSidetemp = (temp *.01);
-}
-
-void basement()
-{ 
-  byte hb;
-  byte lb;
-  Wire.requestFrom(38 ,2); 
-  if (Wire.available()) 
-  {
-    lb=Wire.read();
-    hb=Wire.read();
-  }
-  int temp =word(hb,lb);
-  basementtemp = (temp *.01);
-}
-
-void tvRoom()
-{
-  byte hb;
-  byte lb;
-  Wire.requestFrom(39 ,2); 
-  if (Wire.available()) 
-  {
-    lb=Wire.read();
-    hb=Wire.read();
-  }
-  int temp =word(hb,lb);
-  tvRoomtemp = (temp *.01);
+  return (temp *.01); // the Attiny85/TMP36 multiplied the reading by 100 to circumvent sending a float now I dived by 100 to parse 
 }
 
 void buttonCheck() // checking for button presses I modified the Adafruit code for my application 
