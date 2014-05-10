@@ -69,7 +69,7 @@ void displayControl() // listening for select button to be push to change switch
 
   case 1:
    settings_Menu(); // menu to change system settings including fanON, FanOFF and fanMode 
-    break;
+   break;
   }
 }
 
